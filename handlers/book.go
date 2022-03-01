@@ -11,7 +11,7 @@ func GetBook(ctx *fiber.Ctx)error{
 	var book models.Book
 
 	id := ctx.Params("id")
-
+	
 	err := database.DB().Where("id = ?",id).First(&book).Error
 	if err != nil {
 		fmt.Println("Veritabanı hatası " + err.Error())
@@ -28,13 +28,27 @@ func CreateNewBook(ctx *fiber.Ctx) error{
 	if err != nil {
 		fmt.Println("Veritabanı hatası" + err.Error())
 	}
-
-	err = database.DB().Create(&book).Error
-	if err != nil {
-		fmt.Println("Veritabanı hatası" + err.Error())
+	
+	if book.ID == 0 {
+		err = database.DB().Create(&book).Error
+		if err != nil {
+			fmt.Println("Veritabanı hatası" + err.Error())
+		}
+		return ctx.Status(fiber.StatusOK).JSON(book)
 	}
-
-	return ctx.Status(fiber.StatusOK).JSON(book)
+	var dbGelen models.Book
+	err = database.DB().where("id = ?",book.ID).First(&dbGelen).Error
+	if err != nil {
+		return Errors.New("laan kardeş nabıyon")
+	}
+	// dbGelen.Isim = book.Isim
+	// bla bla bla 
+	err = database.DB().Update(&dbGelen).Error
+	if err != nil {
+		return Errors.New("laan kardeş nabıyon")
+	}
+		
+	return ctx.Status(fiber.StatusOK).JSON(dbGelen)
 }
 
 
